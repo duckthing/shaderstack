@@ -67,6 +67,10 @@ ShaderStack.use()
 love.graphics.draw(...)
 
 
+-- You can send values to uniforms with `send(tag, member, value)`
+ShaderStack.send("blink", "TIME", love.timer.getTime())
+
+
 -- Adding `true` as the second parameter to push/pop immediately calls `use()`
 ShaderStack.push("blink", true)
 love.graphics.draw(...)

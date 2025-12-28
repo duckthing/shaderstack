@@ -85,7 +85,7 @@ Shaders work differently than normal. They receive values from a previous shader
 one. Shaders get turned into something similar to the following:
 
 ```glsl
-// Assuming we have stack like this:
+// Assuming we have a stack like this:
 // {grayscale, rainbow, wobble, shift}
 
 #ifdef PIXEL

@@ -23,7 +23,7 @@ Here are some downsides about ShaderStack's built-in parser:
 	* This will also change in the future
 * Changes to the shader's source are not transparent
 	* Complex shaders might perform badly
-	* ...especially shaders with a control flow
+		* ...especially shaders with a control flow
 * The results just might be ugly
 
 You can avoid those problems by combining shaders manually and calling `setResultShader()`.
@@ -97,30 +97,32 @@ vec4 rainbow_effect(vec4 color, ...) {
 	return color * rainbow;
 }
 
-vec4 effect(vec4 color, ...) {
-	vec4 pixel = color * Texel(...);
-	pixel = grayscale_effect(pixel, ...);
-	pixel = rainbow_effect(pixel, ...);
+// The main fragment body, which passes the color through the other shader fragment bodies
+vec4 effect(vec4 color, Image tex, vec2 image_coords, vec2 screen_coords) {
+	vec4 pixel = color * Texel(tex, image_coords);
+	pixel = grayscale_effect(pixel, tex, image_coords, screen_coords);
+	pixel = rainbow_effect(pixel, tex, image_coords, screen_coords);
 	return pixel;
 }
 #endif
 
 
 #ifdef VERTEX
-vec4 wobble_position(mat4 p, vec4 vertex_position) {
+vec4 wobble_position(..., vec4 vertex_position) {
 	return wobble(vertex_position);
 }
 
-vec4 shift_position(mat4 p, vec4 vertex_position) {
+vec4 shift_position(..., vec4 vertex_position) {
 	return vertex_position + offset;
 }
 
-vec4 position(mat4 p, vec4 vertex_position)
+// The main vertex body, which passes the untransformed point through the other shader vertex bodies
+vec4 position(mat4 transform_projection, vec4 vertex_position)
 {
 	vec4 point = vertex_position;
-	point = wobble_position(p, vertex_position);
-	point = shift_position(p, vertex_position);
-	return p * vertex_position;
+	point = wobble_position(transform_projection, vertex_position);
+	point = shift_position(transform_projection, vertex_position);
+	return transform_projection * position;
 }
 #endif
 ```
@@ -136,7 +138,9 @@ your vertex shaders.
 > when using the shader without others, it's due to a later shader discarding the input, and the compiler optimizing
 > out the uniform.
 
+### Input Shader Formatting
 You are required to format your shaders a certain way. It should look similar to the examples ones in `main.lua`.
+* The more syntax sugar there is, the less likely the parser will combine the shaders correctly
 * ALL vertex and fragment function bodies must be inside of their respective `#ifdef` and `#endif` blocks
 ```glsl
 // OK

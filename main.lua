@@ -95,7 +95,9 @@ vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords)
 ]]
 }
 
-function love.load()
+-- Just to get rid of any LSP warnings with the submodule
+local l = {}
+function l.load()
 	love.graphics.setLineWidth(64)
 
 	for tag, source in pairs(shaderSources) do
@@ -110,7 +112,7 @@ function love.load()
 end
 
 local stackStr = "Stack:"
-function love.draw()
+function l.draw()
 	love.graphics.setShader()
 	love.graphics.print(stackStr)
 
@@ -120,7 +122,7 @@ function love.draw()
 	love.graphics.polygon("line", points)
 end
 
-function love.update()
+function l.update()
 	-- Send a value to a tagged Shader;
 	-- all variants will get updated automatically!
 	local time = love.timer.getTime()
@@ -129,7 +131,7 @@ function love.update()
 	ShaderStack.send("rainbow", "TIME", time)
 end
 
-function love.keypressed(key)
+function l.keypressed(key)
 	local method = "push"
 	if love.keyboard.isDown("lshift") then method = "pop" end
 	if key == "1" then
@@ -145,4 +147,10 @@ function love.keypressed(key)
 		ShaderStack.reset()
 	end
 	stackStr = "Stack: "..table.concat(ShaderStack.getStack(), ", ")
+end
+
+if true then
+	for k, v in pairs(l) do
+		love[k] = v
+	end
 end
